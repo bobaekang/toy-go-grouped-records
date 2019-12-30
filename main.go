@@ -13,9 +13,9 @@ type Group struct {
 
 // Table provides operations for a table with rows of Groups-value pair
 type Table interface {
-	Filter(Group) Table
+	Filter(Group)
 	MarshalJSON() ([]byte, error)
-	Print()
+	Print(string)
 }
 
 // Record models a pairing of Groups and a value
@@ -28,16 +28,24 @@ type Record struct {
 type Records []Record
 
 // Filter implements Filter by Group operation for Records type
-func (aa Records) Filter(by Group) (bb Records) {
-	for _, a := range aa {
-		for _, g := range a.Groups {
+func (aa *Records) Filter(by Group) {
+	bb := *aa
+
+	for i, b := range bb {
+		match := false 
+		
+		for _, g := range b.Groups {
 			if g.Name == by.Name && g.Value == by.Value {
-				bb = append(bb, a)
+				match = true
 			}
+		}
+		
+		if !match {
+			bb = append(bb[:i], bb[i+1:]...)
 		}
 	}
 
-	return bb
+	*aa = bb
 }
 
 // Print implements Print for Records type
@@ -100,8 +108,10 @@ func getSampleData() Records {
 
 func main() {
 	aa := getSampleData()
-	bb := aa.Filter(Group{"colA", 1})
-	cc := aa.Filter(Group{"colB", 2})
+	bb := getSampleData()
+	bb.Filter(Group{"colA", 1})
+	cc := getSampleData()
+	cc.Filter(Group{"colB", 2})
 
 	aa.Print("all")
 	bb.Print("colA is 1")
@@ -112,4 +122,7 @@ func main() {
 		fmt.Println(err)
 	}
 	fmt.Println(string(j))
+
+	// check if Records implements Table at complie time
+	var _ Table = (*Records)(nil)
 }
