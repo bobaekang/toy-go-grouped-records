@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 )
 
@@ -13,6 +14,7 @@ type Group struct {
 // Table provides operations for a table with rows of Groups-value pair
 type Table interface {
 	Filter(Group) Table
+	MarshalJSON() ([]byte, error)
 	Print()
 }
 
@@ -55,6 +57,24 @@ func (aa Records) Print(name string) {
 	fmt.Println("")
 }
 
+// MarshalJSON implements MashalJSON for Records
+func (aa Records) MarshalJSON() ([]byte, error) {
+	var recordsMap []map[string]int
+
+	for _, a := range aa {
+		recordMap := make(map[string]int)
+
+		for _, g := range a.Groups {
+			recordMap[g.Name] = g.Value
+		}
+		recordMap["value"] = a.Value
+
+		recordsMap = append(recordsMap, recordMap)
+	}
+
+	return json.Marshal(recordsMap)
+}
+
 func getSampleData() Records {
 	return Records{
 		{
@@ -86,4 +106,10 @@ func main() {
 	aa.Print("all")
 	bb.Print("colA is 1")
 	cc.Print("colB is 2")
+
+	j, err := aa.MarshalJSON()
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(string(j))
 }
