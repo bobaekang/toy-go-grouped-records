@@ -121,17 +121,51 @@ func getSampleData() Records {
 					Name:  "colA",
 					Value: 1,
 				},
+				{
+					Name:  "colB",
+					Value: 1,
+				},
 			},
 			Value: 12,
 		},
 		{
 			Groups: []Group{
 				{
+					Name:  "colA",
+					Value: 1,
+				},
+				{
 					Name:  "colB",
 					Value: 2,
 				},
 			},
 			Value: 34,
+		},
+		{
+			Groups: []Group{
+				{
+					Name:  "colA",
+					Value: 2,
+				},
+				{
+					Name:  "colB",
+					Value: 1,
+				},
+			},
+			Value: 56,
+		},
+		{
+			Groups: []Group{
+				{
+					Name:  "colA",
+					Value: 2,
+				},
+				{
+					Name:  "colB",
+					Value: 2,
+				},
+			},
+			Value: 78,
 		},
 	}
 }
