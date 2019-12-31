@@ -24,6 +24,9 @@ type Record struct {
 	Value  int
 }
 
+// RecordMap models Record in the flattened map format
+type RecordMap map[string]int
+
 // Records models a collection of Records
 type Records []Record
 
@@ -32,14 +35,14 @@ func (aa *Records) Filter(by Group) {
 	bb := *aa
 
 	for i, b := range bb {
-		match := false 
-		
+		match := false
+
 		for _, g := range b.Groups {
 			if g.Name == by.Name && g.Value == by.Value {
 				match = true
 			}
 		}
-		
+
 		if !match {
 			bb = append(bb[:i], bb[i+1:]...)
 		}
@@ -67,20 +70,20 @@ func (aa Records) Print(name string) {
 
 // MarshalJSON implements MashalJSON for Records
 func (aa Records) MarshalJSON() ([]byte, error) {
-	var recordsMap []map[string]int
+	var recordMaps []RecordMap
 
 	for _, a := range aa {
-		recordMap := make(map[string]int)
+		recordMap := make(RecordMap)
 
 		for _, g := range a.Groups {
 			recordMap[g.Name] = g.Value
 		}
 		recordMap["value"] = a.Value
 
-		recordsMap = append(recordsMap, recordMap)
+		recordMaps = append(recordMaps, recordMap)
 	}
 
-	return json.Marshal(recordsMap)
+	return json.Marshal(recordMaps)
 }
 
 func getSampleData() Records {
