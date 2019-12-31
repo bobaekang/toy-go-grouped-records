@@ -230,27 +230,33 @@ func getSampleData() Records {
 
 func main() {
 	aa := getSampleData()
+	aa.Print("all")
+
+	// filter: colA is 1
 	bb := getSampleData()
 	bb.Filter(Group{"colA", 1})
+	bb.Print("colA is 1")
+
+	// filter: colB is 2
 	cc := getSampleData()
 	cc.Filter(Group{"colB", 2})
-
-	aa.Print("all")
-	bb.Print("colA is 1")
 	cc.Print("colB is 2")
 
+	// to JSON
 	j, err := aa.MarshalJSON()
 	if err != nil {
 		fmt.Println(err)
 	}
 	fmt.Println(string(j))
 
+	// from JSON
 	var dd Records
 	if err := dd.UnmarshalJSON(j); err != nil {
 		fmt.Println(err)
 	}
 	dd.Print("from JSON")
 
+	// from SQLite database
 	var ee Records
 	conn, err := newSqliteConnection("./records.db")
 	defer conn.Close()
