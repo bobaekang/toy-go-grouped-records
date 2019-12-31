@@ -35,10 +35,10 @@ type Records []Record
 func (aa *Records) Filter(by Group) {
 	bb := *aa
 
-	for i, b := range bb {
+	for i := 0; i < len(bb); i++ {
 		match := false
 
-		for _, g := range b.Groups {
+		for _, g := range bb[i].Groups {
 			if g.Name == by.Name && g.Value == by.Value {
 				match = true
 			}
@@ -46,6 +46,7 @@ func (aa *Records) Filter(by Group) {
 
 		if !match {
 			bb = append(bb[:i], bb[i+1:]...)
+			i--
 		}
 	}
 
