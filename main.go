@@ -15,6 +15,7 @@ type Group struct {
 type Table interface {
 	Filter(Group)
 	MarshalJSON() ([]byte, error)
+	UnmarshalJSON([]byte) error
 	Print(string)
 }
 
@@ -86,6 +87,32 @@ func (aa Records) MarshalJSON() ([]byte, error) {
 	return json.Marshal(recordMaps)
 }
 
+// UnmarshalJSON implements UnmarshalJSON for Records
+func (aa *Records) UnmarshalJSON(data []byte) error {
+	var recordMaps []RecordMap
+
+	if err := json.Unmarshal(data, &recordMaps); err != nil {
+		return err
+	}
+
+	for _, m := range recordMaps {
+		var groups []Group
+		var value int
+
+		for k, v := range m {
+			if k != "value" {
+				groups = append(groups, Group{k, v})
+			} else {
+				value = v
+			}
+		}
+
+		*aa = append(*aa, Record{groups, value})
+	}
+
+	return nil
+}
+
 func getSampleData() Records {
 	return Records{
 		{
@@ -125,6 +152,12 @@ func main() {
 		fmt.Println(err)
 	}
 	fmt.Println(string(j))
+
+	var dd Records
+	if err := dd.UnmarshalJSON(j); err != nil {
+		fmt.Println(err)
+	}
+	dd.Print("from JSON")
 
 	// check if Records implements Table at complie time
 	var _ Table = (*Records)(nil)
