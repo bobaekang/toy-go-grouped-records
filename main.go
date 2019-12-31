@@ -1,8 +1,11 @@
 package main
 
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
+
+	_ "github.com/mattn/go-sqlite3"
 )
 
 // Group models a group name-value pair
@@ -16,6 +19,7 @@ type Table interface {
 	Filter(Group)
 	MarshalJSON() ([]byte, error)
 	UnmarshalJSON([]byte) error
+	FetchFromDB(*sql.DB) error
 	Print(string)
 }
 
@@ -114,6 +118,59 @@ func (aa *Records) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+// FetchFromDB implements FetchFromDB for Records type
+func (aa *Records) FetchFromDB(db *sql.DB) error {
+	rows, err := db.Query("SELECT * FROM Records")
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
+
+	cols, err := rows.Columns()
+	if err != nil {
+		return err
+	}
+
+	for rows.Next() {
+		vv := make([]int, len(cols))
+		vvPtrs := make([]interface{}, len(cols))
+
+		for i := range vv {
+			vvPtrs[i] = &vv[i]
+		}
+
+		if err = rows.Scan(vvPtrs...); err != nil {
+			return err
+		}
+
+		var groups []Group
+		var value int
+
+		for i, col := range cols {
+			if col != "value" {
+				groups = append(groups, Group{col, vv[i]})
+			} else {
+				value = vv[i]
+			}
+		}
+
+		*aa = append(*aa, Record{groups, value})
+	}
+
+	return nil
+}
+
+func newSqliteConnection(database string) (*sql.DB, error) {
+	db, err := sql.Open("sqlite3", database)
+	if err != nil {
+		return nil, err
+	}
+
+	fmt.Println("note: connection to SQLite database established.")
+
+	return db, nil
+}
+
 func getSampleData() Records {
 	return Records{
 		{
@@ -193,6 +250,17 @@ func main() {
 		fmt.Println(err)
 	}
 	dd.Print("from JSON")
+
+	var ee Records
+	conn, err := newSqliteConnection("./records.db")
+	defer conn.Close()
+	if err != nil {
+		fmt.Println(err)
+	}
+	if err := ee.FetchFromDB(conn); err != nil {
+		fmt.Println(err)
+	}
+	ee.Print("from DB")
 
 	// check if Records implements Table at complie time
 	var _ Table = (*Records)(nil)
