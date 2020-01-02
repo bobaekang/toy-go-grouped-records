@@ -212,58 +212,10 @@ func newSqliteConnection(database string) (*sql.DB, error) {
 
 func getSampleData() Records {
 	return Records{
-		{
-			Groups: []Group{
-				{
-					Name:  "colA",
-					Value: 1,
-				},
-				{
-					Name:  "colB",
-					Value: 1,
-				},
-			},
-			Value: 12,
-		},
-		{
-			Groups: []Group{
-				{
-					Name:  "colA",
-					Value: 1,
-				},
-				{
-					Name:  "colB",
-					Value: 2,
-				},
-			},
-			Value: 34,
-		},
-		{
-			Groups: []Group{
-				{
-					Name:  "colA",
-					Value: 2,
-				},
-				{
-					Name:  "colB",
-					Value: 1,
-				},
-			},
-			Value: 56,
-		},
-		{
-			Groups: []Group{
-				{
-					Name:  "colA",
-					Value: 2,
-				},
-				{
-					Name:  "colB",
-					Value: 2,
-				},
-			},
-			Value: 78,
-		},
+		{[]Group{{"colA", 1}, {"colB", 1}}, 12},
+		{[]Group{{"colA", 1}, {"colB", 2}}, 34},
+		{[]Group{{"colA", 2}, {"colB", 1}}, 56},
+		{[]Group{{"colA", 2}, {"colB", 2}}, 78},
 	}
 }
 
