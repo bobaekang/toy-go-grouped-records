@@ -13,6 +13,7 @@ import (
 // TableDataService provides data operations for a table
 type TableDataService interface {
 	Filter(by string, matchIf string, value int)
+	Select(varNames ...string)
 	SortBy(by string, order string)
 }
 
@@ -83,6 +84,27 @@ func (aa *Table) Filter(by string, matchIf string, value int) {
 			bb = append(bb[:i], bb[i+1:]...)
 			i--
 		}
+	}
+
+	*aa = bb
+}
+
+// Select implements selecting Variables by name operation for Table type
+func (aa *Table) Select(varNames ...string) {
+	bb := *aa
+
+	for i := range bb {
+		var selected []Variable
+
+		for _, v := range bb[i].Variables {
+			for _, varName := range varNames {
+				if v.Name == varName {
+					selected = append(selected, v)
+				}
+			}
+		}
+
+		bb[i].Variables = selected
 	}
 
 	*aa = bb
@@ -338,6 +360,11 @@ func main() {
 		fmt.Println(err)
 	}
 	gg.Print("from DB")
+
+	// select: colA
+	hh := getSampleData()
+	hh.Select("colA")
+	hh.Print("select colA")
 
 	// check if Table implements Table interfaces at complie time
 	var _ TableDataService = (*Table)(nil)
