@@ -18,7 +18,7 @@ type Group struct {
 
 // TableDataService provides data operations for a table
 type TableDataService interface {
-	Filter(Group)
+	Filter(Group, string)
 	SortBy(string, bool)
 }
 
@@ -48,15 +48,26 @@ type Record struct {
 type Records []Record
 
 // Filter implements Filter by Group operation for Records type
-func (aa *Records) Filter(by Group) {
+func (aa *Records) Filter(by Group, matchIf string) {
 	bb := *aa
 
 	for i := 0; i < len(bb); i++ {
 		match := false
 
 		for _, g := range bb[i].Groups {
-			if g.Name == by.Name && g.Value == by.Value {
-				match = true
+			switch matchIf {
+			case "eq":
+				if g.Name == by.Name && g.Value == by.Value {
+					match = true
+				}
+			case "lt":
+				if g.Name == by.Name && g.Value < by.Value {
+					match = true
+				}
+			case "gt":
+				if g.Name == by.Name && g.Value > by.Value {
+					match = true
+				}
 			}
 		}
 
@@ -268,12 +279,12 @@ func main() {
 
 	// filter: colA is 1
 	bb := getSampleData()
-	bb.Filter(Group{"colA", 1})
+	bb.Filter(Group{"colA", 1}, "eq")
 	bb.Print("colA is 1")
 
 	// filter: colB is 2
 	cc := getSampleData()
-	cc.Filter(Group{"colB", 2})
+	cc.Filter(Group{"colB", 2}, "eq")
 	cc.Print("colB is 2")
 
 	// to JSON
@@ -307,6 +318,16 @@ func main() {
 	ff.SortBy("colB", true)
 	ff.SortBy("colA", false)
 	ff.Print("sort by DESC(colB) then by colA")
+
+	// filter: colA less than 2
+	gg := getSampleData()
+	gg.Filter(Group{"colA", 2}, "lt")
+	gg.Print("colA is less than 2")
+
+	// filter: colB greater than 1
+	hh := getSampleData()
+	hh.Filter(Group{"colB", 1}, "gt")
+	hh.Print("colB is greater than 1")
 
 	// check if Records implements Table interfaces at complie time
 	var _ TableDataService = (*Records)(nil)
