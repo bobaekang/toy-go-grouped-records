@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"sort"
 
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -18,6 +19,7 @@ type Group struct {
 // Table provides operations for a table with rows of Groups-value pair
 type Table interface {
 	Filter(Group)
+	SortBy(string, bool)
 	MarshalJSON() ([]byte, error)
 	UnmarshalJSON([]byte) error
 	FetchFromDB(*sql.DB) error
@@ -51,6 +53,35 @@ func (aa *Records) Filter(by Group) {
 			i--
 		}
 	}
+
+	*aa = bb
+}
+
+// SortBy implements sorting by a Group operation for Records type
+func (aa *Records) SortBy(by string, desc bool) {
+	bb := *aa
+
+	sort.Slice(bb, func(i, j int) bool {
+		var iVal, jVal int
+
+		for _, g := range bb[i].Groups {
+			if g.Name == by {
+				iVal = g.Value
+			}
+		}
+
+		for _, g := range bb[j].Groups {
+			if g.Name == by {
+				jVal = g.Value
+			}
+		}
+
+		if desc {
+			return iVal > jVal
+		}
+
+		return iVal < jVal
+	})
 
 	*aa = bb
 }
@@ -258,6 +289,12 @@ func main() {
 		fmt.Println(err)
 	}
 	ee.Print("from DB")
+
+	// sort by: colB
+	ff := getSampleData()
+	ff.SortBy("colB", true)
+	ff.SortBy("colA", false)
+	ff.Print("sort by DESC(colB) then by colA")
 
 	// check if Records implements Table at complie time
 	var _ Table = (*Records)(nil)
