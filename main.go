@@ -54,26 +54,26 @@ func (aa *Table) Filter(by string, matchIf string, value int) {
 	for i := 0; i < len(bb); i++ {
 		match := false
 
-		for _, g := range bb[i].Variables {
+		for _, v := range bb[i].Variables {
 			switch matchIf {
 			case "==":
-				if g.Name == by && g.Value == value {
+				if v.Name == by && v.Value == value {
 					match = true
 				}
 			case "<=":
-				if g.Name == by && g.Value <= value {
+				if v.Name == by && v.Value <= value {
 					match = true
 				}
 			case ">=":
-				if g.Name == by && g.Value >= value {
+				if v.Name == by && v.Value >= value {
 					match = true
 				}
 			case "<":
-				if g.Name == by && g.Value < value {
+				if v.Name == by && v.Value < value {
 					match = true
 				}
 			case ">":
-				if g.Name == by && g.Value > value {
+				if v.Name == by && v.Value > value {
 					match = true
 				}
 			}
@@ -95,15 +95,15 @@ func (aa *Table) SortBy(by string, order string) {
 	sort.Slice(bb, func(i, j int) bool {
 		var iVal, jVal int
 
-		for _, g := range bb[i].Variables {
-			if g.Name == by {
-				iVal = g.Value
+		for _, v := range bb[i].Variables {
+			if v.Name == by {
+				iVal = v.Value
 			}
 		}
 
-		for _, g := range bb[j].Variables {
-			if g.Name == by {
-				jVal = g.Value
+		for _, v := range bb[j].Variables {
+			if v.Name == by {
+				jVal = v.Value
 			}
 		}
 
@@ -129,8 +129,8 @@ func (aa Table) Print(name string) {
 	for i, a := range aa {
 		fmt.Printf("  Rec #%v:\n", i)
 
-		for _, g := range a.Variables {
-			fmt.Printf("    %v: %v\n", g.Name, g.Value)
+		for _, v := range a.Variables {
+			fmt.Printf("    %v: %v\n", v.Name, v.Value)
 		}
 
 		fmt.Printf("    value: %v\n", a.Value)
@@ -153,17 +153,17 @@ func (aa Table) MarshalJSON() ([]byte, error) {
 		buf.WriteString("{")
 
 		// marshal Variables
-		for j, g := range a.Variables {
+		for j, v := range a.Variables {
 			if j != 0 {
 				buf.WriteString(",")
 			}
 
-			key, err := json.Marshal(g.Name)
+			key, err := json.Marshal(v.Name)
 			if err != nil {
 				return nil, err
 			}
 
-			val, err := json.Marshal(g.Value)
+			val, err := json.Marshal(v.Value)
 			if err != nil {
 				return nil, err
 			}
