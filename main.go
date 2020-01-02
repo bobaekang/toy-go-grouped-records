@@ -30,9 +30,6 @@ type Record struct {
 	Value  int
 }
 
-// RecordMap models Record in the flattened map format
-type RecordMap map[string]int
-
 // Records models a collection of Records
 type Records []Record
 
@@ -136,13 +133,13 @@ func (aa Records) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements UnmarshalJSON for Records
 func (aa *Records) UnmarshalJSON(data []byte) error {
-	var recordMaps []RecordMap
+	var mm []map[string]int
 
-	if err := json.Unmarshal(data, &recordMaps); err != nil {
+	if err := json.Unmarshal(data, &mm); err != nil {
 		return err
 	}
 
-	for _, m := range recordMaps {
+	for _, m := range mm {
 		var groups []Group
 		var value int
 
