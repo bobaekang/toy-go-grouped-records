@@ -279,10 +279,12 @@ func newSqliteConnection(database string) (*sql.DB, error) {
 
 func getSampleData() Records {
 	return Records{
-		{[]Group{{"colA", 1}, {"colB", 1}}, 12},
-		{[]Group{{"colA", 1}, {"colB", 2}}, 34},
-		{[]Group{{"colA", 2}, {"colB", 1}}, 56},
-		{[]Group{{"colA", 2}, {"colB", 2}}, 78},
+		{[]Group{{"colA", 1}, {"colB", 1}}, 1},
+		{[]Group{{"colA", 1}, {"colB", 2}}, 2},
+		{[]Group{{"colA", 2}, {"colB", 1}}, 3},
+		{[]Group{{"colA", 2}, {"colB", 2}}, 4},
+		{[]Group{{"colA", 3}, {"colB", 1}}, 5},
+		{[]Group{{"colA", 3}, {"colB", 2}}, 6},
 	}
 }
 
@@ -290,15 +292,15 @@ func main() {
 	aa := getSampleData()
 	aa.Print("all")
 
-	// filter: colA == 1
+	// filter: colA == 3
 	bb := getSampleData()
-	bb.Filter("colA", "==", 1)
-	bb.Print("colA == 1")
+	bb.Filter("colA", "==", 3)
+	bb.Print("colA == 3")
 
-	// filter: colB <= 1
+	// filter: colB < 1
 	cc := getSampleData()
-	cc.Filter("colB", "<=", 1)
-	cc.Print("colB <= 1")
+	cc.Filter("colB", "<", 2)
+	cc.Print("colB < 2")
 
 	// filter: colA >= 2
 	dd := getSampleData()
