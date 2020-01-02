@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"database/sql"
 	"encoding/json"
 	"fmt"
@@ -76,20 +77,61 @@ func (aa Records) Print(name string) {
 
 // MarshalJSON implements MashalJSON for Records
 func (aa Records) MarshalJSON() ([]byte, error) {
-	var recordMaps []RecordMap
+	var buf bytes.Buffer
 
-	for _, a := range aa {
-		recordMap := make(RecordMap)
+	buf.WriteString("[")
 
-		for _, g := range a.Groups {
-			recordMap[g.Name] = g.Value
+	for i, a := range aa {
+		if i != 0 {
+			buf.WriteString(",")
 		}
-		recordMap["value"] = a.Value
 
-		recordMaps = append(recordMaps, recordMap)
+		buf.WriteString("{")
+
+		// marshal Groups
+		for j, g := range a.Groups {
+			if j != 0 {
+				buf.WriteString(",")
+			}
+
+			key, err := json.Marshal(g.Name)
+			if err != nil {
+				return nil, err
+			}
+
+			val, err := json.Marshal(g.Value)
+			if err != nil {
+				return nil, err
+			}
+
+			buf.Write(key)
+			buf.WriteString(":")
+			buf.Write(val)
+		}
+
+		buf.WriteString(",")
+
+		// marshal Value
+		key, err := json.Marshal("value")
+		if err != nil {
+			return nil, err
+		}
+
+		val, err := json.Marshal(a.Value)
+		if err != nil {
+			return nil, err
+		}
+
+		buf.Write(key)
+		buf.WriteString(":")
+		buf.Write(val)
+
+		buf.WriteString("}")
 	}
 
-	return json.Marshal(recordMaps)
+	buf.WriteString("]")
+
+	return buf.Bytes(), nil
 }
 
 // UnmarshalJSON implements UnmarshalJSON for Records
