@@ -19,7 +19,7 @@ type Group struct {
 // TableDataService provides data operations for a table
 type TableDataService interface {
 	Filter(by string, matchIf string, value int)
-	SortBy(string, bool)
+	SortBy(by string, order string)
 }
 
 // TableFetcher provides data fetching from database for a table
@@ -81,7 +81,7 @@ func (aa *Records) Filter(by string, matchIf string, value int) {
 }
 
 // SortBy implements sorting by a Group operation for Records type
-func (aa *Records) SortBy(by string, desc bool) {
+func (aa *Records) SortBy(by string, order string) {
 	bb := *aa
 
 	sort.Slice(bb, func(i, j int) bool {
@@ -99,11 +99,16 @@ func (aa *Records) SortBy(by string, desc bool) {
 			}
 		}
 
-		if desc {
-			return iVal > jVal
+		var less bool
+
+		switch order {
+		case "asc":
+			less = iVal < jVal
+		case "desc":
+			less = iVal > jVal
 		}
 
-		return iVal < jVal
+		return less
 	})
 
 	*aa = bb
@@ -315,8 +320,8 @@ func main() {
 
 	// sort by: colB
 	ff := getSampleData()
-	ff.SortBy("colB", true)
-	ff.SortBy("colA", false)
+	ff.SortBy("colB", "desc")
+	ff.SortBy("colA", "asc")
 	ff.Print("sort by DESC(colB) then by colA")
 
 	// filter: colA less than 2
