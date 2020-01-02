@@ -10,12 +10,6 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-// Group models a group name-value pair
-type Group struct {
-	Name  string
-	Value int
-}
-
 // TableDataService provides data operations for a table
 type TableDataService interface {
 	Filter(by string, matchIf string, value int)
@@ -38,23 +32,29 @@ type TablePrinter interface {
 	Print(string)
 }
 
-// Record models a pairing of Groups and a value
-type Record struct {
-	Groups []Group
-	Value  int
+// Variable models a name-value pair for a variable
+type Variable struct {
+	Name  string
+	Value int
 }
 
-// Records models a collection of Records
-type Records []Record
+// Row models a Variables-value pair
+type Row struct {
+	Variables []Variable
+	Value     int
+}
 
-// Filter implements Filter by Group operation for Records type
-func (aa *Records) Filter(by string, matchIf string, value int) {
+// Table models a collection of Rows
+type Table []Row
+
+// Filter implements Filter by Variable operation for Table type
+func (aa *Table) Filter(by string, matchIf string, value int) {
 	bb := *aa
 
 	for i := 0; i < len(bb); i++ {
 		match := false
 
-		for _, g := range bb[i].Groups {
+		for _, g := range bb[i].Variables {
 			switch matchIf {
 			case "==":
 				if g.Name == by && g.Value == value {
@@ -88,20 +88,20 @@ func (aa *Records) Filter(by string, matchIf string, value int) {
 	*aa = bb
 }
 
-// SortBy implements sorting by a Group operation for Records type
-func (aa *Records) SortBy(by string, order string) {
+// SortBy implements sorting by a Variable operation for Table type
+func (aa *Table) SortBy(by string, order string) {
 	bb := *aa
 
 	sort.Slice(bb, func(i, j int) bool {
 		var iVal, jVal int
 
-		for _, g := range bb[i].Groups {
+		for _, g := range bb[i].Variables {
 			if g.Name == by {
 				iVal = g.Value
 			}
 		}
 
-		for _, g := range bb[j].Groups {
+		for _, g := range bb[j].Variables {
 			if g.Name == by {
 				jVal = g.Value
 			}
@@ -122,14 +122,14 @@ func (aa *Records) SortBy(by string, order string) {
 	*aa = bb
 }
 
-// Print implements Print for Records type
-func (aa Records) Print(name string) {
+// Print implements Print for Table type
+func (aa Table) Print(name string) {
 	fmt.Printf("Table: %v\n", name)
 
 	for i, a := range aa {
 		fmt.Printf("  Rec #%v:\n", i)
 
-		for _, g := range a.Groups {
+		for _, g := range a.Variables {
 			fmt.Printf("    %v: %v\n", g.Name, g.Value)
 		}
 
@@ -139,8 +139,8 @@ func (aa Records) Print(name string) {
 	fmt.Println("")
 }
 
-// MarshalJSON implements MashalJSON for Records
-func (aa Records) MarshalJSON() ([]byte, error) {
+// MarshalJSON implements MashalJSON for Table
+func (aa Table) MarshalJSON() ([]byte, error) {
 	var buf bytes.Buffer
 
 	buf.WriteString("[")
@@ -152,8 +152,8 @@ func (aa Records) MarshalJSON() ([]byte, error) {
 
 		buf.WriteString("{")
 
-		// marshal Groups
-		for j, g := range a.Groups {
+		// marshal Variables
+		for j, g := range a.Variables {
 			if j != 0 {
 				buf.WriteString(",")
 			}
@@ -198,8 +198,8 @@ func (aa Records) MarshalJSON() ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-// UnmarshalJSON implements UnmarshalJSON for Records
-func (aa *Records) UnmarshalJSON(data []byte) error {
+// UnmarshalJSON implements UnmarshalJSON for Table
+func (aa *Table) UnmarshalJSON(data []byte) error {
 	var mm []map[string]int
 
 	if err := json.Unmarshal(data, &mm); err != nil {
@@ -207,25 +207,25 @@ func (aa *Records) UnmarshalJSON(data []byte) error {
 	}
 
 	for _, m := range mm {
-		var groups []Group
+		var Variables []Variable
 		var value int
 
 		for k, v := range m {
 			if k != "value" {
-				groups = append(groups, Group{k, v})
+				Variables = append(Variables, Variable{k, v})
 			} else {
 				value = v
 			}
 		}
 
-		*aa = append(*aa, Record{groups, value})
+		*aa = append(*aa, Row{Variables, value})
 	}
 
 	return nil
 }
 
-// FetchFromDB implements FetchFromDB for Records type
-func (aa *Records) FetchFromDB(db *sql.DB) error {
+// FetchFromDB implements FetchFromDB for Table type
+func (aa *Table) FetchFromDB(db *sql.DB) error {
 	rows, err := db.Query("SELECT * FROM Records")
 	if err != nil {
 		return err
@@ -249,18 +249,18 @@ func (aa *Records) FetchFromDB(db *sql.DB) error {
 			return err
 		}
 
-		var groups []Group
+		var Variables []Variable
 		var value int
 
 		for i, col := range cols {
 			if col != "value" {
-				groups = append(groups, Group{col, vv[i]})
+				Variables = append(Variables, Variable{col, vv[i]})
 			} else {
 				value = vv[i]
 			}
 		}
 
-		*aa = append(*aa, Record{groups, value})
+		*aa = append(*aa, Row{Variables, value})
 	}
 
 	return nil
@@ -277,14 +277,14 @@ func newSqliteConnection(database string) (*sql.DB, error) {
 	return db, nil
 }
 
-func getSampleData() Records {
-	return Records{
-		{[]Group{{"colA", 1}, {"colB", 1}}, 1},
-		{[]Group{{"colA", 1}, {"colB", 2}}, 2},
-		{[]Group{{"colA", 2}, {"colB", 1}}, 3},
-		{[]Group{{"colA", 2}, {"colB", 2}}, 4},
-		{[]Group{{"colA", 3}, {"colB", 1}}, 5},
-		{[]Group{{"colA", 3}, {"colB", 2}}, 6},
+func getSampleData() Table {
+	return Table{
+		{[]Variable{{"colA", 1}, {"colB", 1}}, 1},
+		{[]Variable{{"colA", 1}, {"colB", 2}}, 2},
+		{[]Variable{{"colA", 2}, {"colB", 1}}, 3},
+		{[]Variable{{"colA", 2}, {"colB", 2}}, 4},
+		{[]Variable{{"colA", 3}, {"colB", 1}}, 5},
+		{[]Variable{{"colA", 3}, {"colB", 2}}, 6},
 	}
 }
 
@@ -321,14 +321,14 @@ func main() {
 	fmt.Println(string(j))
 
 	// from JSON
-	var ff Records
+	var ff Table
 	if err := ff.UnmarshalJSON(j); err != nil {
 		fmt.Println(err)
 	}
 	ff.Print("from JSON")
 
 	// from SQLite database
-	var gg Records
+	var gg Table
 	conn, err := newSqliteConnection("./records.db")
 	defer conn.Close()
 	if err != nil {
@@ -339,9 +339,9 @@ func main() {
 	}
 	gg.Print("from DB")
 
-	// check if Records implements Table interfaces at complie time
-	var _ TableDataService = (*Records)(nil)
-	var _ TableFetcher = (*Records)(nil)
-	var _ TableJSONService = (*Records)(nil)
-	var _ TablePrinter = (*Records)(nil)
+	// check if Table implements Table interfaces at complie time
+	var _ TableDataService = (*Table)(nil)
+	var _ TableFetcher = (*Table)(nil)
+	var _ TableJSONService = (*Table)(nil)
+	var _ TablePrinter = (*Table)(nil)
 }
