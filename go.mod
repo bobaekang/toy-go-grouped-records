@@ -1,4 +1,4 @@
-module github.com/bobaekang/toy-go-grouped-records
+module github.com/bobaekang/toy-go-simple-table
 
 go 1.13
 
