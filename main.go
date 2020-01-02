@@ -226,7 +226,7 @@ func (aa *Table) UnmarshalJSON(data []byte) error {
 
 // FetchFromDB implements FetchFromDB for Table type
 func (aa *Table) FetchFromDB(db *sql.DB) error {
-	rows, err := db.Query("SELECT * FROM Records")
+	rows, err := db.Query("SELECT * FROM Data")
 	if err != nil {
 		return err
 	}
@@ -329,7 +329,7 @@ func main() {
 
 	// from SQLite database
 	var gg Table
-	conn, err := newSqliteConnection("./records.db")
+	conn, err := newSqliteConnection("./data.db")
 	defer conn.Close()
 	if err != nil {
 		fmt.Println(err)
