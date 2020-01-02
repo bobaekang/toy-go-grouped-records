@@ -1,1 +1,1 @@
-# Toy Go Grouped Records
+# Toy Go Simple Table
