@@ -282,15 +282,26 @@ func main() {
 	aa := getSampleData()
 	aa.Print("all")
 
-	// filter: colA is 1
+	// filter: colA == 1
 	bb := getSampleData()
 	bb.Filter("colA", "eq", 1)
 	bb.Print("colA is 1")
 
-	// filter: colB is 2
+	// filter: colB <= 2
 	cc := getSampleData()
-	cc.Filter("colB", "eq", 2)
-	cc.Print("colB is 2")
+	cc.Filter("colB", "lt", 2)
+	cc.Print("colB is less than 2")
+
+	// filter: colA >= 1
+	dd := getSampleData()
+	dd.Filter("colA", "gt", 1)
+	dd.Print("colA is greater than 1")
+
+	// sort by: colA then DESC(colB)
+	ee := getSampleData()
+	ee.SortBy("colA", "asc")
+	ee.SortBy("colB", "desc")
+	ee.Print("sort by colA then by DESC(colB)")
 
 	// to JSON
 	j, err := aa.MarshalJSON()
@@ -300,39 +311,23 @@ func main() {
 	fmt.Println(string(j))
 
 	// from JSON
-	var dd Records
-	if err := dd.UnmarshalJSON(j); err != nil {
+	var ff Records
+	if err := ff.UnmarshalJSON(j); err != nil {
 		fmt.Println(err)
 	}
-	dd.Print("from JSON")
+	ff.Print("from JSON")
 
 	// from SQLite database
-	var ee Records
+	var gg Records
 	conn, err := newSqliteConnection("./records.db")
 	defer conn.Close()
 	if err != nil {
 		fmt.Println(err)
 	}
-	if err := ee.FetchFromDB(conn); err != nil {
+	if err := gg.FetchFromDB(conn); err != nil {
 		fmt.Println(err)
 	}
-	ee.Print("from DB")
-
-	// sort by: colB
-	ff := getSampleData()
-	ff.SortBy("colB", "desc")
-	ff.SortBy("colA", "asc")
-	ff.Print("sort by DESC(colB) then by colA")
-
-	// filter: colA less than 2
-	gg := getSampleData()
-	gg.Filter("colA", "lt", 2)
-	gg.Print("colA is less than 2")
-
-	// filter: colB greater than 1
-	hh := getSampleData()
-	hh.Filter("colB", "gt", 1)
-	hh.Print("colB is greater than 1")
+	gg.Print("from DB")
 
 	// check if Records implements Table interfaces at complie time
 	var _ TableDataService = (*Records)(nil)
