@@ -311,60 +311,25 @@ func getSampleData() Table {
 }
 
 func main() {
-	aa := getSampleData()
-	aa.Print("all")
+	table := getSampleData()
+	table.Print("all")
 
-	// filter: colA == 3
-	bb := getSampleData()
-	bb.Filter("colA", "==", 3)
-	bb.Print("colA == 3")
+	// test TableDataService implementation
+	testFilter(table)
+	testSelect(table)
+	testSortBy(table)
 
-	// filter: colB < 1
-	cc := getSampleData()
-	cc.Filter("colB", "<", 2)
-	cc.Print("colB < 2")
-
-	// filter: colA >= 2
-	dd := getSampleData()
-	dd.Filter("colA", ">=", 2)
-	dd.Print("colA >= 2")
-
-	// sort by: colA then DESC(colB)
-	ee := getSampleData()
-	ee.SortBy("colA", "asc")
-	ee.SortBy("colB", "desc")
-	ee.Print("sort by colA then by DESC(colB)")
-
-	// to JSON
-	j, err := aa.MarshalJSON()
-	if err != nil {
-		fmt.Println(err)
-	}
-	fmt.Println(string(j))
-
-	// from JSON
-	var ff Table
-	if err := ff.UnmarshalJSON(j); err != nil {
-		fmt.Println(err)
-	}
-	ff.Print("from JSON")
-
-	// from SQLite database
-	var gg Table
+	// from TableFetcher implementation
 	conn, err := newSqliteConnection("./data.db")
-	defer conn.Close()
 	if err != nil {
 		fmt.Println(err)
 	}
-	if err := gg.FetchFromDB(conn); err != nil {
-		fmt.Println(err)
-	}
-	gg.Print("from DB")
+	defer conn.Close()
+	testFetchFromDB(conn)
 
-	// select: colA
-	hh := getSampleData()
-	hh.Select("colA")
-	hh.Print("select colA")
+	// test TableJSONService implementation
+	testMarshalJSON(table)
+	testUnmarshalTest(table)
 
 	// check if Table implements Table interfaces at complie time
 	var _ TableDataService = (*Table)(nil)
