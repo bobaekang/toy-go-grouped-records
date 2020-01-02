@@ -16,13 +16,25 @@ type Group struct {
 	Value int
 }
 
-// Table provides operations for a table with rows of Groups-value pair
-type Table interface {
+// TableDataService provides data operations for a table
+type TableDataService interface {
 	Filter(Group)
 	SortBy(string, bool)
+}
+
+// TableFetcher provides data fetching from database for a table
+type TableFetcher interface {
+	FetchFromDB(*sql.DB) error
+}
+
+// TableJSONService provides JSON operations for a table
+type TableJSONService interface {
 	MarshalJSON() ([]byte, error)
 	UnmarshalJSON([]byte) error
-	FetchFromDB(*sql.DB) error
+}
+
+// TablePrinter provides custom print for a table
+type TablePrinter interface {
 	Print(string)
 }
 
@@ -296,6 +308,9 @@ func main() {
 	ff.SortBy("colA", false)
 	ff.Print("sort by DESC(colB) then by colA")
 
-	// check if Records implements Table at complie time
-	var _ Table = (*Records)(nil)
+	// check if Records implements Table interfaces at complie time
+	var _ TableDataService = (*Records)(nil)
+	var _ TableFetcher = (*Records)(nil)
+	var _ TableJSONService = (*Records)(nil)
+	var _ TablePrinter = (*Records)(nil)
 }
