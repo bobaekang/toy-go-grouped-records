@@ -56,15 +56,23 @@ func (aa *Records) Filter(by string, matchIf string, value int) {
 
 		for _, g := range bb[i].Groups {
 			switch matchIf {
-			case "eq":
+			case "==":
 				if g.Name == by && g.Value == value {
 					match = true
 				}
-			case "lt":
+			case "<=":
+				if g.Name == by && g.Value <= value {
+					match = true
+				}
+			case ">=":
+				if g.Name == by && g.Value >= value {
+					match = true
+				}
+			case "<":
 				if g.Name == by && g.Value < value {
 					match = true
 				}
-			case "gt":
+			case ">":
 				if g.Name == by && g.Value > value {
 					match = true
 				}
@@ -284,18 +292,18 @@ func main() {
 
 	// filter: colA == 1
 	bb := getSampleData()
-	bb.Filter("colA", "eq", 1)
-	bb.Print("colA is 1")
+	bb.Filter("colA", "==", 1)
+	bb.Print("colA == 1")
 
-	// filter: colB <= 2
+	// filter: colB <= 1
 	cc := getSampleData()
-	cc.Filter("colB", "lt", 2)
-	cc.Print("colB is less than 2")
+	cc.Filter("colB", "<=", 1)
+	cc.Print("colB <= 1")
 
-	// filter: colA >= 1
+	// filter: colA >= 2
 	dd := getSampleData()
-	dd.Filter("colA", "gt", 1)
-	dd.Print("colA is greater than 1")
+	dd.Filter("colA", ">=", 2)
+	dd.Print("colA >= 2")
 
 	// sort by: colA then DESC(colB)
 	ee := getSampleData()
