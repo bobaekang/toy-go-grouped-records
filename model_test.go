@@ -39,7 +39,7 @@ func TestTableDataSerivce(t *testing.T) {
 		{[]Variable{{"colA", 3}, {"colB", 1}}, 5},
 		{[]Variable{{"colA", 3}, {"colB", 2}}, 6},
 	}
-	if !reflect.DeepEqual(test1, expected1) {
+	if !reflect.DeepEqual(test1, expected1) && len(test1) == len(expected1) {
 		t.Error(
 			"Filter: colA == 3",
 			"\nexpected ", expected1,
