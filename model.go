@@ -37,11 +37,8 @@ type Variable struct {
 	Value int
 }
 
-// Row models a Variables-value pair
-type Row struct {
-	Variables []Variable
-	Value     int
-}
+// Row models a collection of Varaibles
+type Row []Variable
 
 // Table models a collection of Rows
 type Table []Row
@@ -53,7 +50,7 @@ func (aa *Table) Filter(by string, matchIf string, value int) {
 	for i := 0; i < len(bb); i++ {
 		match := false
 
-		for _, v := range bb[i].Variables {
+		for _, v := range bb[i] {
 			switch matchIf {
 			case "==":
 				if v.Name == by && v.Value == value {
@@ -94,7 +91,7 @@ func (aa *Table) Select(varNames ...string) {
 	for i := range bb {
 		var selected []Variable
 
-		for _, v := range bb[i].Variables {
+		for _, v := range bb[i] {
 			for _, varName := range varNames {
 				if v.Name == varName {
 					selected = append(selected, v)
@@ -102,7 +99,7 @@ func (aa *Table) Select(varNames ...string) {
 			}
 		}
 
-		bb[i].Variables = selected
+		bb[i] = selected
 	}
 
 	*aa = bb
@@ -115,13 +112,13 @@ func (aa *Table) SortBy(by string, order string) {
 	sort.Slice(bb, func(i, j int) bool {
 		var iVal, jVal int
 
-		for _, v := range bb[i].Variables {
+		for _, v := range bb[i] {
 			if v.Name == by {
 				iVal = v.Value
 			}
 		}
 
-		for _, v := range bb[j].Variables {
+		for _, v := range bb[j] {
 			if v.Name == by {
 				jVal = v.Value
 			}
@@ -167,18 +164,13 @@ func (aa *Table) FetchFromDB(db *sql.DB) error {
 			return err
 		}
 
-		var Variables []Variable
-		var value int
+		var row Row
 
 		for i, col := range cols {
-			if col != "value" {
-				Variables = append(Variables, Variable{col, vv[i]})
-			} else {
-				value = vv[i]
-			}
+			row = append(row, Variable{col, vv[i]})
 		}
 
-		*aa = append(*aa, Row{Variables, value})
+		*aa = append(*aa, row)
 	}
 
 	return nil
@@ -198,7 +190,7 @@ func (aa Table) MarshalJSON() ([]byte, error) {
 		buf.WriteString("{")
 
 		// marshal Variables
-		for j, v := range a.Variables {
+		for j, v := range a {
 			if j != 0 {
 				buf.WriteString(",")
 			}
@@ -218,23 +210,6 @@ func (aa Table) MarshalJSON() ([]byte, error) {
 			buf.Write(val)
 		}
 
-		buf.WriteString(",")
-
-		// marshal Value
-		key, err := json.Marshal("value")
-		if err != nil {
-			return nil, err
-		}
-
-		val, err := json.Marshal(a.Value)
-		if err != nil {
-			return nil, err
-		}
-
-		buf.Write(key)
-		buf.WriteString(":")
-		buf.Write(val)
-
 		buf.WriteString("}")
 	}
 
@@ -252,18 +227,13 @@ func (aa *Table) UnmarshalJSON(data []byte) error {
 	}
 
 	for _, m := range mm {
-		var Variables []Variable
-		var value int
+		var row Row
 
 		for k, v := range m {
-			if k != "value" {
-				Variables = append(Variables, Variable{k, v})
-			} else {
-				value = v
-			}
+			row = append(row, Variable{k, v})
 		}
 
-		*aa = append(*aa, Row{Variables, value})
+		*aa = append(*aa, row)
 	}
 
 	return nil
@@ -276,11 +246,9 @@ func (aa Table) Print(name string) {
 	for i, a := range aa {
 		fmt.Printf("  Rec #%v:\n", i)
 
-		for _, v := range a.Variables {
+		for _, v := range a {
 			fmt.Printf("    %v: %v\n", v.Name, v.Value)
 		}
-
-		fmt.Printf("    value: %v\n", a.Value)
 	}
 
 	fmt.Println("")

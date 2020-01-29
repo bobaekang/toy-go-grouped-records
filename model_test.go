@@ -11,12 +11,12 @@ import (
 
 func getSampleData() Table {
 	return Table{
-		{[]Variable{{"colA", 1}, {"colB", 1}}, 1},
-		{[]Variable{{"colA", 1}, {"colB", 2}}, 2},
-		{[]Variable{{"colA", 2}, {"colB", 1}}, 3},
-		{[]Variable{{"colA", 2}, {"colB", 2}}, 4},
-		{[]Variable{{"colA", 3}, {"colB", 1}}, 5},
-		{[]Variable{{"colA", 3}, {"colB", 2}}, 6},
+		{{"colA", 1}, {"colB", 1}, {"value", 1}},
+		{{"colA", 1}, {"colB", 2}, {"value", 2}},
+		{{"colA", 2}, {"colB", 1}, {"value", 3}},
+		{{"colA", 2}, {"colB", 2}, {"value", 4}},
+		{{"colA", 3}, {"colB", 1}, {"value", 5}},
+		{{"colA", 3}, {"colB", 2}, {"value", 6}},
 	}
 }
 
@@ -36,8 +36,8 @@ func TestTableDataSerivce(t *testing.T) {
 	test1 := getSampleData()
 	test1.Filter("colA", "==", 3)
 	expected1 := Table{
-		{[]Variable{{"colA", 3}, {"colB", 1}}, 5},
-		{[]Variable{{"colA", 3}, {"colB", 2}}, 6},
+		{{"colA", 3}, {"colB", 1}, {"value", 5}},
+		{{"colA", 3}, {"colB", 2}, {"value", 6}},
 	}
 	if !reflect.DeepEqual(test1, expected1) && len(test1) == len(expected1) {
 		t.Error(
@@ -50,9 +50,9 @@ func TestTableDataSerivce(t *testing.T) {
 	test2 := getSampleData()
 	test2.Filter("colB", "<", 2)
 	expected2 := Table{
-		{[]Variable{{"colA", 1}, {"colB", 1}}, 1},
-		{[]Variable{{"colA", 2}, {"colB", 1}}, 3},
-		{[]Variable{{"colA", 3}, {"colB", 1}}, 5},
+		{{"colA", 1}, {"colB", 1}, {"value", 1}},
+		{{"colA", 2}, {"colB", 1}, {"value", 3}},
+		{{"colA", 3}, {"colB", 1}, {"value", 5}},
 	}
 	if !reflect.DeepEqual(test2, expected2) {
 		t.Error(
@@ -65,10 +65,10 @@ func TestTableDataSerivce(t *testing.T) {
 	test3 := getSampleData()
 	test3.Filter("colA", ">=", 2)
 	expected3 := Table{
-		{[]Variable{{"colA", 2}, {"colB", 1}}, 3},
-		{[]Variable{{"colA", 2}, {"colB", 2}}, 4},
-		{[]Variable{{"colA", 3}, {"colB", 1}}, 5},
-		{[]Variable{{"colA", 3}, {"colB", 2}}, 6},
+		{{"colA", 2}, {"colB", 1}, {"value", 3}},
+		{{"colA", 2}, {"colB", 2}, {"value", 4}},
+		{{"colA", 3}, {"colB", 1}, {"value", 5}},
+		{{"colA", 3}, {"colB", 2}, {"value", 6}},
 	}
 	if !reflect.DeepEqual(test3, expected3) {
 		t.Error(
@@ -80,18 +80,18 @@ func TestTableDataSerivce(t *testing.T) {
 
 	// test Select
 	test4 := getSampleData()
-	test4.Select("colA")
+	test4.Select("colA", "value")
 	expected4 := Table{
-		{[]Variable{{"colA", 1}}, 1},
-		{[]Variable{{"colA", 1}}, 2},
-		{[]Variable{{"colA", 2}}, 3},
-		{[]Variable{{"colA", 2}}, 4},
-		{[]Variable{{"colA", 3}}, 5},
-		{[]Variable{{"colA", 3}}, 6},
+		{{"colA", 1}, {"value", 1}},
+		{{"colA", 1}, {"value", 2}},
+		{{"colA", 2}, {"value", 3}},
+		{{"colA", 2}, {"value", 4}},
+		{{"colA", 3}, {"value", 5}},
+		{{"colA", 3}, {"value", 6}},
 	}
 	if !reflect.DeepEqual(test4, expected4) {
 		t.Error(
-			"Select: colA",
+			"Select: colA, value",
 			"\nexpected ", expected4,
 			"\n     got ", test4,
 		)
@@ -102,12 +102,12 @@ func TestTableDataSerivce(t *testing.T) {
 	test5.SortBy("colA", "asc")
 	test5.SortBy("colB", "desc")
 	expected5 := Table{
-		{[]Variable{{"colA", 1}, {"colB", 2}}, 2},
-		{[]Variable{{"colA", 2}, {"colB", 2}}, 4},
-		{[]Variable{{"colA", 3}, {"colB", 2}}, 6},
-		{[]Variable{{"colA", 1}, {"colB", 1}}, 1},
-		{[]Variable{{"colA", 2}, {"colB", 1}}, 3},
-		{[]Variable{{"colA", 3}, {"colB", 1}}, 5},
+		{{"colA", 1}, {"colB", 2}, {"value", 2}},
+		{{"colA", 2}, {"colB", 2}, {"value", 4}},
+		{{"colA", 3}, {"colB", 2}, {"value", 6}},
+		{{"colA", 1}, {"colB", 1}, {"value", 1}},
+		{{"colA", 2}, {"colB", 1}, {"value", 3}},
+		{{"colA", 3}, {"colB", 1}, {"value", 5}},
 	}
 	if !reflect.DeepEqual(test5, expected5) {
 		t.Error(
@@ -131,8 +131,8 @@ func TestTableFetcher(t *testing.T) {
 	}
 
 	expected := Table{
-		{[]Variable{{"colA", 1}, {"colB", 1}}, 1},
-		{[]Variable{{"colA", 1}, {"colB", 2}}, 2},
+		{{"colA", 1}, {"colB", 1}, {"value", 1}},
+		{{"colA", 1}, {"colB", 2}, {"value", 2}},
 	}
 	if !reflect.DeepEqual(test, expected) {
 		t.Error(
