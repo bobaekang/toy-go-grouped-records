@@ -89,7 +89,7 @@ func (aa *Table) Select(varNames ...string) {
 	bb := *aa
 
 	for i := range bb {
-		var selected []Variable
+		var selected Row
 
 		for _, v := range bb[i] {
 			for _, varName := range varNames {
